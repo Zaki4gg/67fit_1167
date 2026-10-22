@@ -1,30 +1,17 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/mock_item_image.dart';
+
 /// Styling versi sederhana: pilih item contoh lewat bottom sheet,
 /// tampil di canvas tanpa drag/rotate/undo. Tap item = hapus dari canvas.
+/// Item contoh memakai gambar asset mocks di assets/pakaian/.
+/// Kartu picker putih + garis luar; kartu canvas transparan mengikuti
+/// bentuk gambar, tanpa nama item.
 class CanvasItem {
-  final IconData icon;
-  final Color bg;
-  final String label;
+  final String assetPath;
 
-  CanvasItem({required this.icon, required this.bg, required this.label});
+  CanvasItem({required this.assetPath});
 }
-
-class _DummyOption {
-  final IconData icon;
-  final Color bg;
-  final String label;
-  const _DummyOption(this.icon, this.bg, this.label);
-}
-
-const _dummyOptions = [
-  _DummyOption(Icons.checkroom, Color(0xFFDCE5F5), 'Kemeja contoh'),
-  _DummyOption(Icons.luggage, Color(0xFFF5E6DC), 'Celana contoh'),
-  _DummyOption(Icons.backpack, Color(0xFFE2E8F0), 'Tas contoh'),
-  _DummyOption(Icons.hiking, Color(0xFFD9F5E3), 'Sepatu contoh'),
-  _DummyOption(Icons.watch, Color(0xFFF5F5DC), 'Jam contoh'),
-  _DummyOption(Icons.face, Color(0xFFEADCF5), 'Topi contoh'),
-];
 
 class StylingScreen extends StatefulWidget {
   const StylingScreen({super.key});
@@ -58,32 +45,25 @@ class _StylingScreenState extends State<StylingScreen> {
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
                 ),
-                itemCount: _dummyOptions.length,
+                itemCount: MockPakaian.semua.length,
                 itemBuilder: (ctx, index) {
-                  final opt = _dummyOptions[index];
+                  final asset = MockPakaian.semua[index];
                   return GestureDetector(
                     onTap: () {
                       Navigator.pop(ctx);
-                      setState(() => items.add(CanvasItem(
-                            icon: opt.icon,
-                            bg: opt.bg,
-                            label: opt.label,
-                          )));
+                      setState(() => items.add(CanvasItem(assetPath: asset)));
                     },
+                    // Kartu putih dengan garis luar, tanpa nama item.
                     child: Container(
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: opt.bg,
-                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.black26),
                       ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(opt.icon, size: 40, color: Colors.black54),
-                          const SizedBox(height: 4),
-                          Text(opt.label,
-                              style: const TextStyle(fontSize: 11),
-                              textAlign: TextAlign.center),
-                        ],
+                      child: MockItemImage(
+                        assetPath: asset,
+                        fallbackIconSize: 40,
                       ),
                     ),
                   );
@@ -105,7 +85,7 @@ class _StylingScreenState extends State<StylingScreen> {
     if (items.length < 2) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Pilih minimal 2 pakaian (contoh)',
+          content: Text('Pilih minimal 2 pakaian',
               style: TextStyle(color: Colors.white)),
           backgroundColor: Colors.redAccent,
         ),
@@ -114,7 +94,7 @@ class _StylingScreenState extends State<StylingScreen> {
     }
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Contoh tersimpan! (belum ada backend)',
+        content: Text('Outfit tersimpan',
             style: TextStyle(color: Colors.white)),
         backgroundColor: Color(0xFFA8B50A),
       ),
@@ -168,25 +148,15 @@ class _StylingScreenState extends State<StylingScreen> {
                         final item = items[index];
                         return GestureDetector(
                           onTap: () => _confirmRemove(index),
+                          // Kartu canvas: background transparan dan mengikuti
+                          // bentuk/proporsi gambar (tanpa kotak & nama item).
+                          // fit: contain menjaga rasio gambar aslinya.
                           child: Container(
-                            width: 140,
                             height: 140,
                             margin: const EdgeInsets.only(bottom: 12),
-                            decoration: BoxDecoration(
-                              color: item.bg,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(item.icon,
-                                    size: 56, color: Colors.black54),
-                                const SizedBox(height: 6),
-                                Text(item.label,
-                                    style: const TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.black54)),
-                              ],
+                            child: MockItemImage(
+                              assetPath: item.assetPath,
+                              fallbackIconSize: 60,
                             ),
                           ),
                         );
@@ -198,7 +168,13 @@ class _StylingScreenState extends State<StylingScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildSmallCircleButton(Icons.refresh, _clearCanvas),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Reset (refresh) saja — fitur mundur 1 langkah dihapus.
+                      _buildSmallCircleButton(Icons.refresh, _clearCanvas),
+                    ],
+                  ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
@@ -262,8 +238,8 @@ class _StylingScreenState extends State<StylingScreen> {
           child: ListTile(
             leading:
                 const Icon(Icons.delete_outline, color: Colors.redAccent),
-            title: Text('Hapus ${items[index].label}',
-                style: const TextStyle(color: Colors.redAccent)),
+            title: const Text('Hapus pakaian dari kanvas',
+                style: TextStyle(color: Colors.redAccent)),
             onTap: () {
               Navigator.pop(context);
               setState(() => items.removeAt(index));
@@ -274,14 +250,14 @@ class _StylingScreenState extends State<StylingScreen> {
     );
   }
 
-  Widget _buildSmallCircleButton(IconData icon, VoidCallback onTap) {
+  Widget _buildSmallCircleButton(IconData icon, VoidCallback? onTap) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Container(
         padding: const EdgeInsets.all(8),
-        decoration: const BoxDecoration(
-          color: Colors.black,
+        decoration: BoxDecoration(
+          color: onTap == null ? Colors.grey[400] : Colors.black,
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: Colors.white, size: 20),

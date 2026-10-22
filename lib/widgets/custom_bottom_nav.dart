@@ -24,7 +24,7 @@ class CustomBottomNavBar extends StatelessWidget {
             Container(
               height: 64,
               decoration: BoxDecoration(
-                color: const Color(0xFFE5E7EB),
+                color: const Color(0xFFE5E7EB), // warna abu abu
                 borderRadius: BorderRadius.circular(35),
               ),
               child: Row(
@@ -54,8 +54,8 @@ class CustomBottomNavBar extends StatelessWidget {
     );
   }
 
-  Widget _navItem(IconData out, IconData fill, String label, int index) {
-    final sel = currentIndex == index;
+  Widget _navItem(IconData iconOutlined, IconData iconFilled, String label, int index) {
+    final isSelected = currentIndex == index;
     return InkWell(
       onTap: () => onTap(index),
       borderRadius: BorderRadius.circular(20),
@@ -63,9 +63,22 @@ class CustomBottomNavBar extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(sel ? fill : out, color: sel ? Colors.black : Colors.grey[700], size: 22),
-            Text(label, style: TextStyle(fontSize: 10, fontWeight: sel ? FontWeight.bold : FontWeight.normal, color: sel ? Colors.black : Colors.grey[700])),
+            Icon(
+              isSelected ? iconFilled : iconOutlined,
+              color: isSelected ? Colors.black : Colors.grey[700],
+              size: 22,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? Colors.black : Colors.grey[700],
+              ),
+            ),
           ],
         ),
       ),

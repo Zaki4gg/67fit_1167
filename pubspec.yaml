@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:
@@ -24,3 +25,5 @@ flutter_launcher_icons:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/pakaian/
